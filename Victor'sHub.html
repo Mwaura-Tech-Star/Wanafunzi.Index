@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VictorsHub Games</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b14;color:#f4f7ff;font-family:Arial,sans-serif}
+header{padding:18px 6%;background:#111827;border-bottom:1px solid #29334a;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:24px;font-weight:bold;color:#38e8ff}
+main{max-width:1150px;margin:auto;padding:25px 18px}
+.hero{text-align:center;padding:35px 0}
+.hero h1{font-size:clamp(38px,7vw,72px);margin:10px}
+.hero h1 span{color:#38e8ff}
+.hero p,.card p,.note{color:#9aa7c0;line-height:1.5}
+.search{display:block;width:100%;max-width:500px;margin:20px auto;padding:13px;background:#111827;color:white;border:1px solid #34415a;border-radius:10px}
+.filters{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:20px 0}
+button{cursor:pointer}
+.filters button,.secondary{padding:10px 15px;border-radius:10px;background:#182238;color:white;border:1px solid #34415a}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.card{background:#111827;border:1px solid #29334a;border-radius:16px;padding:16px;transition:.2s}
+.card:hover{transform:translateY(-4px);border-color:#38e8ff}
+.art{height:125px;border-radius:12px;background:linear-gradient(135deg,#15334c,#49306b);display:grid;place-items:center;font-size:60px}
+.card p{min-height:42px}
+.play,.action{background:#38e8ff;color:#08101a;border:0;border-radius:9px;padding:12px;font-weight:bold}
+.play{width:100%}
+.modal{display:none;position:fixed;inset:0;background:#000d;align-items:center;justify-content:center;padding:12px;z-index:10}
+.modal.show{display:flex}
+.dialog{background:#111827;border:1px solid #34415a;border-radius:18px;padding:20px;width:min(100%,550px);max-height:92vh;overflow:auto;text-align:center}
+.close{float:right;background:#26334a;color:white;border:0;border-radius:8px;padding:8px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:300px;margin:18px auto}
+.cell{aspect-ratio:1;background:#1b2940;border:1px solid #34415a;border-radius:9px;color:#38e8ff;font-size:32px}
+.memory{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:350px;margin:15px auto}
+.memory button{aspect-ratio:1;font-size:25px;background:#1b2940;color:white;border:1px solid #34415a;border-radius:8px}
+footer{text-align:center;padding:24px;color:#9aa7c0;border-top:1px solid #29334a}
+@media(max-width:750px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="logo">🎮 VictorsHub</div><span>GAME ZONE</span></header>
+<main>
+<section class="hero">
+<h1>READY. SET. <span>PLAY.</span></h1>
+<p>Classic games, brain challenges and arcade fun — all in one place!</p>
+<input class="search" id="search" placeholder="🔍 Search games..." oninput="renderGames()">
+</section>
+<div class="filters">
+<button onclick="setFilter('All')">All Games</button>
+<button onclick="setFilter('Classic')">Classic</button>
+<button onclick="setFilter('Brain')">Brain Games</button>
+<button onclick="setFilter('Arcade')">Arcade</button>
+</div>
+<h2>🔥 Explore Games</h2>
+<div class="grid" id="games"></div>
+</main>
+<footer>© 2026 VictorsHub Games · Play. Think. Win.</footer>
+<div class="modal" id="modal" onclick="if(event.target===this)closeGame()">
+<div class="dialog">
+<button class="close" onclick="closeGame()">✕</button>
+<h2 id="gameTitle"></h2>
+<div id="gameArea"></div>
+</div>
+</div>
+
+<script>
+const games=[
+{id:'tic',name:'Tic-Tac-Toe',icon:'⭕',cat:'Classic',desc:'Get three in a row.'},
+{id:'chess',name:'Chess Board',icon:'♟️',cat:'Classic',desc:'Move pieces and plan your strategy.'},
+{id:'rps',name:'Rock Paper Scissors',icon:'✊',cat:'Classic',desc:'Challenge the computer.'},
+{id:'guess',name:'Number Guess',icon:'🔢',cat:'Brain',desc:'Guess the secret number.'},
+{id:'memory',name:'Memory Match',icon:'🧠',cat:'Brain',desc:'Find all matching pairs.'},
+{id:'snake',name:'Snake',icon:'🐍',cat:'Arcade',desc:'Eat, grow and avoid crashing.'},
+{id:'math',name:'Math Challenge',icon:'🧮',cat:'Brain',desc:'Solve a maths question.'},
+{id:'coin',name:'Coin Flip',icon:'🪙',cat:'Classic',desc:'Flip a coin.'},
+{id:'dice',name:'Dice Roller',icon:'🎲',cat:'Classic',desc:'Roll a virtual dice.'},
+{id:'reaction',name:'Reaction Speed',icon:'⚡',cat:'Arcade',desc:'Test your reaction time.'},
+{id:'mole',name:'Whack-a-Mole',icon:'🔨',cat:'Arcade',desc:'Hit as many moles as you can.'},
+{id:'word',name:'Word Scramble',icon:'🔤',cat:'Brain',desc:'Unscramble the hidden word.'},
+{id:'connect',name:'Connect Four',icon:'🔴',cat:'Classic',desc:'Connect four pieces in a row.'},
+{id:'clicker',name:'Click Challenge',icon:'🚀',cat:'Arcade',desc:'Click quickly for 10 seconds.'}
+];
+let filter='All';
+function setFilter(f){filter=f;renderGames()}
+function renderGames(){
+let q=document.getElementById('search').value.toLowerCase();
+let list=games.filter(g=>(filter==='All'||g.cat===filter)&&(g.name+' '+g.desc).toLowerCase().includes(q));
+document.getElementById('games').innerHTML=list.map(g=>`<article class="card"><div class="art">${g.icon}</div><h3>${g.name}</h3><p>${g.desc}</p><button class="play" onclick="openGame('${g.id}')">PLAY NOW →</button></article>`).join('');
+}
+function show(title,html){document.getElementById('gameTitle').textContent=title;document.getElementById('gameArea').innerHTML=html;document.getElementById('modal').classList.add('show')}
+let timers=[];
+function closeGame(){timers.forEach(clearInterval);timers=[];if(window.snakeTimer)clearInterval(window.snakeTimer);document.getElementById('modal').classList.remove('show')}
+function openGame(id){
+if(window.snakeTimer)clearInterval(window.snakeTimer);
+if(id==='tic')tic();
+if(id==='chess')chess();
+if(id==='rps')rps();
+if(id==='guess')guess();
+if(id==='memory')memory();
+if(id==='snake')snake();
+if(id==='math')mathGame();
+if(id==='coin')coinGame();
+if(id==='dice')diceGame();
+if(id==='reaction')reactionGame();
+if(id==='mole')moleGame();
+if(id==='word')wordGame();
+if(id==='connect')connectGame();
+if(id==='clicker')clickerGame();
+}
+
+// TIC-TAC-TOE
+function tic(){
+let b=Array(9).fill(''),turn='X',over=false;
+show('Tic-Tac-Toe','<p id="status">X plays first</p><div class="board" id="tb"></div><button class="action" onclick="tic()">Restart</button>');
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],el=document.getElementById('tb');
+b.forEach((_,i)=>{let c=document.createElement('button');c.className='cell';c.onclick=()=>{if(over||b[i])return;b[i]=turn;c.textContent=turn;let w=wins.find(x=>x.every(n=>b[n]===turn));if(w){over=true;document.getElementById('status').textContent=turn+' wins! 🎉'}else if(b.every(Boolean)){over=true;document.getElementById('status').textContent='Draw!'}else{turn=turn==='X'?'O':'X';document.getElementById('status').textContent=turn+"'s turn"}};el.appendChild(c)});
+}
+
+// ROCK PAPER SCISSORS
+function rps(){window.ys=0;window.cs=0;show('Rock Paper Scissors',`<p>Choose a move</p><button class="action" onclick="playRPS('Rock')">✊ Rock</button><button class="action" onclick="playRPS('Paper')">✋ Paper</button><button class="action" onclick="playRPS('Scissors')">✌️ Scissors</button><h3 id="rr">Ready?</h3><p id="rs">You 0 — 0 Computer</p>`)}
+function playRPS(p){let c=['Rock','Paper','Scissors'][Math.floor(Math.random()*3)];let r=p===c?'Draw!':((p==='Rock'&&c==='Scissors')||(p==='Paper'&&c==='Rock')||(p==='Scissors'&&c==='Paper'))?'You win! 🎉':'Computer wins!';if(p!==c){if(r.startsWith('You'))ys++;else cs++}document.getElementById('rr').textContent=`${p} vs ${c}: ${r}`;document.getElementById('rs').textContent=`You ${ys} — ${cs} Computer`}
+
+// NUMBER GUESS
+function guess(){window.secret=Math.floor(Math.random()*100)+1;window.tries=0;show('Number Guess',`<p>Guess a number from 1 to 100</p><input id="gn" type="number" placeholder="Your guess"><button class="action" onclick="checkGuess()">Guess</button><h3 id="gr">Good luck!</h3><p id="gt">Attempts: 0</p><button class="action" onclick="guess()">New Number</button>`)}
+function checkGuess(){let n=Number(document.getElementById('gn').value);if(!Number.isInteger(n)||n<1||n>100){document.getElementById('gr').textContent='Enter a number from 1 to 100';return}tries++;document.getElementById('gr').textContent=n===secret?'Correct! 🎉':n<secret?'Too low!':'Too high!';document.getElementById('gt').textContent='Attempts: '+tries;if(n===secret)document.getElementById('gn').disabled=true}
+
+// MATH CHALLENGE
+function mathGame(){let a=Math.floor(Math.random()*30)+1,b=Math.floor(Math.random()*30)+1;window.mathAnswer=a+b;show('Math Challenge',`<h2>${a} + ${b} = ?</h2><input id="ma" type="number"><button class="action" onclick="checkMath()">Submit</button><p id="mr"></p><button class="action" onclick="mathGame()">Next Question</button>`)}
+function checkMath(){document.getElementById('mr').textContent=Number(document.getElementById('ma').value)===mathAnswer?'Correct! 🎉':'Try again!'}
+
+// COIN FLIP
+function coinGame(){show('Coin Flip','<div id="coin" style="font-size:90px">🪙</div><button class="action" onclick="flipCoin()">Flip Coin</button><h3 id="cr">Ready?</h3>')}
+function flipCoin(){let h=Math.random()<.5;document.getElementById('coin').textContent=h?'👑':'🪙';document.getElementById('cr').textContent=h?'Heads!':'Tails!'}
+
+// DICE ROLLER
+function diceGame(){show('Dice Roller','<div id="die" style="font-size:90px">🎲</div><button class="action" onclick="rollDie()">Roll</button><h3 id="dr">Roll to begin</h3>')}
+function rollDie(){let n=Math.floor(Math.random()*6)+1;document.getElementById('die').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][n-1];document.getElementById('dr').textContent='You rolled '+n}
+
+// WORD SCRAMBLE
+const words=['PLANET','GAMING','PUZZLE','ROCKET','BROWSER','VICTOR','SCHOOL','FRIENDS'];
+function wordGame(){window.word=words[Math.floor(Math.random()*words.length)];let s=word.split('').sort(()=>Math.random()-.5).join('');if(s===word)s=word.slice(1)+word[0];show('Word Scramble',`<p>Unscramble the word</p><h2 style="letter-spacing:6px;color:#38e8ff">${s}</h2><input id="wa" placeholder="Your answer"><button class="action" onclick="checkWord()">Check</button><p id="wr"></p><button class="action" onclick="wordGame()">New Word</button>`)}
+function checkWord(){document.getElementById('wr').textContent=document.getElementById('wa').value.trim().toUpperCase()===word?'Correct! 🎉':'Try again!'}
+
+// MEMORY MATCH
+function memory(){let vals=['🍉','🚀','🐸','⭐','🎧','🍕','🦊','⚽'];vals=[...vals,...vals].sort(()=>Math.random()-.5);let first=null,lock=false,moves=0,matched=0;show('Memory Match','<p id="ms">Moves: 0 | Pairs: 0/8</p><div class="memory" id="mb"></div><button class="action" onclick="memory()">Restart</button>');let el=document.getElementById('mb');vals.forEach(v=>{let b=document.createElement('button');b.textContent='?';b.onclick=()=>{if(lock||b.classList.contains('matched')||b===first)return;b.textContent=v;if(!first){first=b;return}moves++;if(first.textContent===b.textContent){first.classList.add('matched');b.classList.add('matched');first=null;matched++;document.getElementById('ms').textContent=`Moves: ${moves} | Pairs: ${matched}/8`;if(matched===8)document.getElementById('ms').textContent='You win! 🎉'}else{lock=true;let old=first;first=null;setTimeout(()=>{old.textContent='?';b.textContent='?';lock=false},600);document.getElementById('ms').textContent=`Moves: ${moves} | Pairs: ${matched}/8`}};el.appendChild(b)})}
+
+// CHESS BOARD: casual piece placement
+function chess(){let chars={'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'};let b=['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'].map(x=>x.split(''));let selected=null;show('Chess Board','<p class="note">Casual chess board. Legal chess moves are not enforced.</p><div id="cb" style="display:grid;grid-template-columns:repeat(8,1fr);max-width:400px;margin:auto"></div><button class="action" onclick="chess()">Reset Board</button>');function draw(){let el=document.getElementById('cb');el.innerHTML='';b.forEach((row,r)=>row.forEach((p,c)=>{let x=document.createElement('button');x.style.cssText=`aspect-ratio:1;border:0;background:${(r+c)%2?'#64718a':'#d7dbe6'};font-size:clamp(16px,4vw,28px);padding:0`;x.textContent=chars[p]||'';x.onclick=()=>{if(selected){b[r][c]=b[selected[0]][selected[1]];b[selected[0]][selected[1]]='.';selected=null;draw()}else if(p!=='.'){selected=[r,c];draw()}};el.appendChild(x)}))}draw()}
+
+// SNAKE
+function snake(){show('Snake','<p>Use arrow keys or WASD. Avoid the walls and yourself.</p><p id="ss">Score: 0</p><canvas id="sc" width="320" height="320" style="max-width:100%;background:#08101a"></canvas><p><button class="action" onclick="snake()">Restart</button></p>');let ctx=document.getElementById('sc').getContext('2d'),body=[{x:10,y:10},{x:9,y:10}],dir='right',food={x:15,y:10},score=0,dead=false;window.onkeydown=e=>{let d={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'}[e.key];if(d&&({up:'down',down:'up',left:'right',right:'left'})[d]!==dir)dir=d};function tick(){if(dead)return;let h={...body[0]};if(dir==='up')h.y--;if(dir==='down')h.y++;if(dir==='left')h.x--;if(dir==='right')h.x++;if(h.x<0||h.y<0||h.x>=20||h.y>=20||body.some(p=>p.x===h.x&&p.y===h.y)){dead=true;ctx.fillStyle='white';ctx.font='22px Arial';ctx.fillText('GAME OVER',90,160);clearInterval(window.snakeTimer);return}body.unshift(h);if(h.x===food.x&&h.y===food.y){score++;document.getElementById('ss').textContent='Score: '+score;food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)}}else body.pop();ctx.fillStyle='#08101a';ctx.fillRect(0,0,320,320);ctx.fillStyle='#ff5fba';ctx.fillRect(food.x*16,food.y*16,16,16);body.forEach((p,i)=>{ctx.fillStyle=i?'#29bfa5':'#38e8ff';ctx.fillRect(p.x*16+1,p.y*16+1,14,14)})}tick();window.snakeTimer=setInterval(tick,130)}
+
+// REACTION SPEED
+function reactionGame(){show('Reaction Speed','<p>Wait for green, then click fast!</p><button id="react" style="width:100%;height:150px;background:#b83248;color:white;border:0;border-radius:12px;font-size:22px">Start</button><p id="rt">Ready?</p>');let box=document.getElementById('react'),state='ready',start=0,timer=null;box.onclick=()=>{if(state==='ready'){state='wait';box.textContent='Wait...';timer=setTimeout(()=>{state='go';start=performance.now();box.style.background='#19a974';box.textContent='CLICK NOW!'},1000+Math.random()*3000)}else if(state==='wait'){clearTimeout(timer);state='ready';box.style.background='#b83248';box.textContent='Too soon! Try again';document.getElementById('rt').textContent='Click to restart'}else{document.getElementById('rt').textContent='Reaction time: '+Math.round(performance.now()-start)+' ms';state='ready';box.style.background='#b83248';box.textContent='Play again'}}}
+
+// CLICK CHALLENGE
+function clickerGame(){let count=0,left=10,active=false;show('Click Challenge','<h2 id="cc">Clicks: 0</h2><button id="clickbtn" class="action" style="width:100%;height:120px;font-size:25px">START</button><p id="ct">Click as many times as you can in 10 seconds!</p>');let btn=document.getElementById('clickbtn');btn.onclick=()=>{if(!active){active=true;count=0;left=10;btn.textContent='CLICK!';document.getElementById('cc').textContent='Clicks: 0';let timer=setInterval(()=>{left--;document.getElementById('ct').textContent=left+' seconds left';if(left<=0){clearInterval(timer);active=false;btn.textContent='PLAY AGAIN';document.getElementById('ct').textContent='Final score: '+count}},1000);timers.push(timer)}else{count++;document.getElementById('cc').textContent='Clicks: '+count}}}
+
+// CONNECT FOUR
+function connectGame(){let b=Array.from({length:6},()=>Array(7).fill(0)),player=1,over=false;show('Connect Four','<p id="cs">Player 1 🔴</p><div id="four" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;background:#2457bd;padding:6px;border-radius:10px"></div><button class="action" onclick="connectGame()">Restart</button>');let el=document.getElementById('four');for(let r=0;r<6;r++)for(let c=0;c<7;c++){let x=document.createElement('button');x.style.cssText='aspect-ratio:1;border:0;border-radius:50%;background:#dce6f5;padding:0;font-size:clamp(10px,2.5vw,20px)';x.onclick=()=>{if(over)return;let rr=5;while(rr>=0&&b[rr][c])rr--;if(rr<0)return;b[rr][c]=player;draw();if(won(rr,c)){over=true;document.getElementById('cs').textContent='Player '+player+' wins! 🎉'}else if(b.every(row=>row.every(Boolean))){over=true;document.getElementById('cs').textContent='Draw!'}else{player=player===1?2:1;document.getElementById('cs').textContent='Player '+player+(player===1?' 🔴':' 🟡')}};el.appendChild(x)}function draw(){[...el.children].forEach((x,i)=>{let v=b[Math.floor(i/7)][i%7];x.textContent=v?(v===1?'🔴':'🟡'):''})}function won(r,c){for(let [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){let n=1;for(let s of [-1,1]){let rr=r+dr*s,cc=c+dc*s;while(rr>=0&&rr<6&&cc>=0&&cc<7&&b[rr][cc]===player){n++;rr+=dr*s;cc+=dc*s}}if(n>=4)return true}return false}}
+
+// WHACK-A-MOLE
+function moleGame(){let score=0,left=15;show('Whack-a-Mole','<p id="mt">Score: 0 | Time: 15</p><div id="moles" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div><button class="action" onclick="moleGame()">Restart</button>');let el=document.getElementById('moles');for(let i=0;i<9;i++){let b=document.createElement('button');b.style.cssText='font-size:35px;padding:14px 0;border-radius:10px;background:#1b2940;border:1px solid #34415a';b.textContent='🕳️';b.onclick=()=>{if(b.textContent==='🐹'&&left>0){score++;document.getElementById('mt').textContent='Score: '+score+' | Time: '+left;b.textContent='🕳️'}};el.appendChild(b)}let timer=setInterval(()=>{left--;if(left<=0){clearInterval(timer);[...el.children].forEach(b=>b.textContent='🕳️');document.getElementById('mt').textContent='Game over! Score: '+score;return} [...el.children].forEach(b=>b.textContent='🕳️');el.children[Math.floor(Math.random()*9)].textContent='🐹';document.getElementById('mt').textContent='Score: '+score+' | Time: '+left},700);timers.push(timer)}
+renderGames();
+</script>
+</body>
+</html>
