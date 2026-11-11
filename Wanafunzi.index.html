@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wanafunzi - Career Discovery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(to right, #74ebd5, #9face6);
+            animation: backgroundMove 15s infinite alternate;
+        }
+
+        @keyframes backgroundMove {
+            from { background-position: left; }
+            to { background-position: right; }
+        }
+
+        nav {
+            background: #2e86de;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li {
+            cursor: pointer;
+        }
+
+        .landing {
+            text-align: center;
+            padding: 80px 20px;
+            background: url('https://images.unsplash.com/photo-1588072432836-e10032774350') no-repeat center/cover;
+            color: white;
+        }
+
+        .landing h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: white;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #2e86de;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b4f72;
+        }
+
+        .career {
+            background: #eaf2ff;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        /* Chatbot */
+        #chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+        }
+
+        #chatbot header {
+            background: #2e86de;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        #chatbotMessages {
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        #chatbot input {
+            border: none;
+            border-top: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            border-radius: 0 0 10px 10px;
+        }
+
+        #chatToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2e86de;
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Wanafunzi</div>
+    <ul>
+        <li onclick="showSection('home')">Home</li>
+        <li onclick="showSection('about')">About Us</li>
+        <li onclick="showSection('serve')">Who We Serve</li>
+        <li onclick="showSection('contact')">Contact Us</li>
+    </ul>
+</nav>
+
+<div id="home" class="landing">
+    <h1>Discover Your Future Career</h1>
+    <p>Helping learners align talents, interests, and performance with CBE pathways.</p>
+</div>
+
+<div id="about" class="card" style="display:none;">
+    <h2>About Us</h2>
+    <p>This website is developed by <strong>THE KBA SCHOOL KAHAWA WEST LEARNERS</strong>, for their <strong>Mombasa Mini Games competition</strong>.</p>
+    <p>Wanafunzi is dedicated to guiding learners in discovering their career paths early. Our mission is to align talents, interests, and academic performance with Competency-Based Education (CBE) pathways.</p>
+    <p><strong>Vision:</strong> Empower every learner to achieve their dreams.</p>
+    <p><strong>Values:</strong> Integrity, Innovation, Inclusivity.</p>
+</div>
+
+<div id="serve" class="card" style="display:none;">
+    <h2>Who We Serve</h2>
+    <p>We serve primary and secondary learners across Kenya, helping them explore career opportunities based on their strengths and interests. Teachers and parents also benefit from insights to support learners’ growth.</p>
+</div>
+
+<div id="contact" class="card" style="display:none;">
+    <h2>Contact Us</h2>
+    <form>
+        <label>Name:</label>
+        <input type="text">
+        <label>Email:</label>
+        <input type="email">
+        <label>Message:</label>
+        <textarea></textarea>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Career Discovery Form</h2>
+    <label>Name:</label>
+    <input type="text" id="name">
+
+    <label>Performance in Mathematics (0-100):</label>
+    <input type="number" id="math">
+
+    <label>Performance in English (0-100):</label>
+    <input type="number" id="english">
+
+    <label>Performance in Kiswahili (0-100):</label>
+    <input type="number" id="kiswahili">
+
+    <label>Performance in Science & Technology (0-100):</label>
+    <input type="number" id="science">
+
+    <label>Performance in Social Studies (0-100):</label>
+    <input type="number" id="social">
+
+    <label>Performance in Agriculture (0-100):</label>
+    <input type="number" id="agriculture">
+
+    <label>Performance in Creative Arts (0-100):</label>
+    <input type="number" id="arts">
+
+    <label>Hobbies & Interests:</label>
+    <textarea id="hobbies"></textarea>
+
+    <label>What do you love most?</label>
+    <input type="text" id="love">
+
+    <label>What do you want to be when you grow up?</label>
+    <input type="text" id="future">
+
+    <button onclick="recommendCareer()">Find My Career</button>
+
+    <div id="results" class="hidden">
+        <h2>Recommended Careers</h2>
+        <div id="careerList"></div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Wanafunzi | info@wanafunzi.org | Phone: +254-700-123456</p>
+</footer>
+
+<!-- Chatbot -->
+<div id="chatToggle">💬</div>
+<div id="chatbot">
+    <header>Wanafunzi Chatbot</header>
+    <div id="chatbotMessages"></div>
+    <input type="text" id="chatInput" placeholder="Type a message...">
+</div>
+
+<script>
+function showSection(section){
+    document.getElementById("home").style.display="none";
+    document.getElementById("about").style.display="none";
+    document.getElementById("serve").style.display="none";
+    document.getElementById("contact").style.display="none";
+    document.getElementById(section).style.display="block";
+}
+
+function recommendCareer(){
+    const math = parseInt(document.getElementById("math").value)||0;
+    const english = parseInt(document.getElementById("english").value)||0;
+    const kiswahili = parseInt(document.getElementById("kiswahili").value)||0;
+    const science = parseInt(document.getElementById("N
